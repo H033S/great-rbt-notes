@@ -25,3 +25,7 @@ To run the app, you can use below command. If you want to expand on the cli docu
 fastapi dev main.py
 ```
 
+## Testing 
+For any testing that will be made in the backed we can use test folder for that. We are going to be using `pytest` as default. 
+You can find the official documentation on [pytest official docs](https://docs.pytest.org/en/stable/getting-started.html#get-started)
+
