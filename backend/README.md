@@ -14,3 +14,14 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 python3.12 -m pip install -r requirements.txt
 ```
+
+## Run the App
+
+> [!IMPORTANT]
+> Make sure you are within the main folder, otherwise, fastapi will not find the main.py
+
+To run the app, you can use below command. If you want to expand on the cli documentation, you can visit [fastapi-cli](https://fastapi.tiangolo.com/fastapi-cli/)
+```bash
+fastapi dev main.py
+```
+
