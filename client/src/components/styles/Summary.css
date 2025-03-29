@@ -1,0 +1,75 @@
+/* Summary.css */
+
+.summary-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: "Inter", sans-serif;
+    color: var(--text-color);
+}
+
+.summary-container h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+.summary-container h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--input-border);
+    padding-bottom: 0.5rem;
+}
+
+.summary-container h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--label-color);
+}
+
+.summary-container ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.summary-container ul li {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--input-border);
+}
+
+.summary-container ul li strong {
+    color: var(--label-color);
+}
+
+.summary-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+.summary-buttons button {
+    padding: 0.85rem 1.5rem;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.summary-buttons button:hover {
+    background-color: var(--button-bg-hover);
+    transform: translateY(-2px);
+}
+
+.summary-buttons button:active {
+    transform: scale(0.98);
+}
