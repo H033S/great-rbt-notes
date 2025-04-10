@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import "../components/styles/SessionDetails.css";
 
 const SessionDetails = () => {
@@ -41,7 +42,6 @@ const SessionDetails = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form Submitted:", formData);
-    // Add any additional submission logic here
     navigate.push("/summary");
   };
 
@@ -197,9 +197,7 @@ const SessionDetails = () => {
         />
       </div>
       <button type="submit">Continue</button>
-      <button type="button" onClick={handleBack}>
-        Back
-      </button>
+       <button type="button" onClick={handleBack}>Back</button>
     </form>
   );
 };

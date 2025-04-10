@@ -1,111 +1,140 @@
+// Report.js
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { html2pdf } from "html2pdf.js";
-import "../components/styles/report.css";
+import html2pdf from "html2pdf.js";
+import { ArrowLeft, Download } from "lucide-react";
+import "../components/styles/Report.css";
 
 const Report = () => {
   const router = useRouter();
-  const reportRef = useRef();
-  const [patientDetails, setPatientDetails] = useState(null);
-  const [sessionDetails, setSessionDetails] = useState(null);
+  const reportContentRef = useRef();
+  const [reportText, setReportText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Load saved data when the component mounts
+  // On component mount, try to load and parse the report data
   useEffect(() => {
-    const savedPatient = sessionStorage.getItem("patientDetails");
-    const savedSession = sessionStorage.getItem("sessionDetails");
+    setLoading(true); // Ensure loading is true initially
+    setError(""); // Clear previous errors
+    setReportText(""); // Clear previous text
 
-    if (savedPatient) {
-      setPatientDetails(JSON.parse(savedPatient));
-    }
-    if (savedSession) {
-      setSessionDetails(JSON.parse(savedSession));
+    try {
+      const savedReportData = sessionStorage.getItem("reportData");
+
+      if (!savedReportData) {
+        setError("Error: No report data found in storage.");
+        setLoading(false);
+        return;
+      }
+
+      // Attempt to parse as JSON first
+      try {
+        const parsedData = JSON.parse(savedReportData);
+        // Check if it's the expected structure {"report": "..."}
+        if (parsedData && typeof parsedData.report === 'string') {
+          setReportText(parsedData.report); // Extract the actual report string
+        } else {
+          // It's valid JSON, but not the expected structure, display raw JSON
+          console.warn("Report data is valid JSON but not the expected format.");
+          setReportText(JSON.stringify(parsedData, null, 2)); // Pretty print JSON
+        }
+      } catch (jsonError) {
+        // If JSON.parse fails, assume it's plain text
+        console.log("Report data is not valid JSON, treating as plain text.");
+        setReportText(savedReportData); // Use the raw string directly
+      }
+
+    } catch (err) {
+      console.error("Error processing report data:", err);
+      setError("Error reading or processing report data from storage.");
+    } finally {
+      setLoading(false);
     }
   }, []);
 
+  // Function to download report as PDF
+  const downloadReport = () => {
+    if (!reportContentRef.current) {
+        console.error("Report content ref not available for PDF generation.");
+        return;
+    }
+    // Configuration options for html2pdf
+    const options = {
+        margin:       1,
+        filename:     'report.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true }, // Use scale for better resolution
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    // Generate the PDF
+    html2pdf().from(reportContentRef.current).set(options).save();
+  };
+
+  // Function to navigate back to the summary page
   const handleBack = () => {
-    // Navigate back to the Summary page
     router.push("/summary");
   };
 
-  const downloadReport = () => 
-    {
-
-        html2pdf().from(reportRef.current).save("report.pdf");
-
-    }
-
-  const pdfGenerator = () => {
-    const reportData = {
-      // Patient details from PatientDetails.js
-      client_name: patientDetails?.patientName || "",
-      caregiver_name: patientDetails?.caregiverName || "",
-      date_of_treatment: patientDetails?.dateOfTreatment || "",
-      address: patientDetails?.address || "",
-      city: patientDetails?.city || "",
-      state: patientDetails?.state || "",
-      zip: patientDetails?.zip || "",
-      apt: patientDetails?.apt || "",
-      // Session details from SessionDetails.js
-      session: {
-        first_occurrence: {
-          antecedent: sessionDetails?.antecedent1 || "",
-          maladaptive_behavior: sessionDetails?.maladaptiveBehavior1 || "",
-          intervention: sessionDetails?.intervention1 || "",
-          result: sessionDetails?.interventionResult1 || ""
-        },
-        second_occurrence: {
-          antecedent: sessionDetails?.antecedent2 || "",
-          maladaptive_behavior: sessionDetails?.maladaptiveBehavior2 || "",
-          intervention: sessionDetails?.intervention2 || "",
-          result: sessionDetails?.interventionResult2 || ""
-        },
-        reinforcement: {
-          reinforcers_used: sessionDetails?.reinforcersUsed || "",
-          when_reinforcer_used: sessionDetails?.whenReinforcerUsed || ""
-        },
-        closure: {
-          data_collected: sessionDetails?.dataCollected || "",
-          concerns: sessionDetails?.concerns || "",
-          next_steps: sessionDetails?.nextSteps || ""
-        }
-      }
-    };
-  
-    console.log("Generated Report JSON:", JSON.stringify(reportData, null, 2));
-  };
-
   return (
-    <div className="report-container" onSubmit={pdfGenerator}>
-      <h1>Report</h1>
-      <section className="patient-summary" style={{ textAlign: 'center' }}>
-        {
-          <div className="pdf-container" style={{
-            width: '100%',
-            height: '600px',
-            border: '2px dashed #ccc',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f8f9fa',
-            margin: '20px 0'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ marginBottom: '10px', color: '#666' }}>PDF Report will be displayed here</p>
-              <p style={{ fontSize: '0.9em', color: '#999' }}>Click "Download Report" to generate</p>
-            </div>
+    <div className="report-container">
+      <h1>Generated Report</h1>
+
+      {loading ? (
+        <div className="loading-indicator" style={{ textAlign: "center", marginTop: "50px" }}>
+          <p>Loading report...</p>
+        </div>
+      ) : error ? (
+         // Display error prominently if there is one
+         <div className="error-message" style={{ border: '1px solid red', padding: '15px', color: 'red', backgroundColor: '#ffeeee', margin: '20px 0' }}>
+            <p><strong>Error Loading Report:</strong></p>
+            <pre>{error}</pre>
+         </div>
+      ) : (
+        // Container for the report content that will be captured for PDF
+        <div
+          ref={reportContentRef}
+          className="report-content-area"
+          style={{
+            width: "100%",
+            maxWidth: "800px", 
+            margin: "20px auto",
+            padding: "25px",
+            border: "1px solid #e0e0e0",
+            borderRadius: "5px",
+            backgroundColor: "#ffffff",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+            fontFamily: "sans-serif", 
+            lineHeight: "1.6", 
+            color: "#333",
+          }}
+        >
+          {/* Use <pre> to respect newlines (\n) from the backend string */}
+          <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word", margin: 0, fontSize: "1rem" }}>
+            {reportText}
+          </pre>
+        </div>
+      )}
+
+      {/* Render buttons only if not loading and no error */}
+      {!loading && !error && (
+          <div className="report-buttons">
+            <button type="button" onClick={handleBack}>
+              <ArrowLeft size={16} /> Back to Summary
+            </button>
+            <button type="button" onClick={downloadReport}>
+              <Download size={16} /> Download Report
+            </button>
           </div>
-        }
-      </section>
-      <div className="report-buttons">
-        <button type="button" onClick={handleBack}>
-          Back to Summary
-        </button>
-        <button type="button" onClick={downloadReport}>
-          Download Report
-        </button>
-      </div>
+      )}
+      {/* Render Back button even if there's an error */}
+       {error && (
+           <div className="report-buttons">
+             <button type="button" onClick={handleBack}>
+               <ArrowLeft size={16} /> Back to Summary
+             </button>
+           </div>
+       )}
     </div>
   );
 };
