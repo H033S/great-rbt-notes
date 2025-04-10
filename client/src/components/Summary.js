@@ -66,11 +66,12 @@ const Summary = () => {
     console.log("Generated Report JSON:", JSON.stringify(reportData, null, 2));
   
     // Later you can send reportData to your backend via fetch, axios, etc.
+
+    router.push("/report");
   };
-  
 
   return (
-    <div className="summary-container">
+    <div className="summary-container" onSubmit={handleGenerateReport}>
       <h1>Summary</h1>
       <section className="patient-summary">
         <h2>Patient Details</h2>
