@@ -1,12 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import "../components/styles/Summary.css";
 
 const Summary = () => {
   const router = useRouter();
   const [patientDetails, setPatientDetails] = useState(null);
   const [sessionDetails, setSessionDetails] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // State to hold potential errors
 
   // Load saved data when the component mounts
   useEffect(() => {
@@ -22,11 +25,14 @@ const Summary = () => {
   }, []);
 
   const handleBack = () => {
-    // Navigate back to the SessionDetails page
     router.push("/session-details");
   };
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = async () => {
+    // Clear previous errors and set loading state
+    setError(null);
+    setLoading(true);
+
     const reportData = {
       // Patient details from PatientDetails.js
       client_name: patientDetails?.patientName || "",
@@ -62,21 +68,74 @@ const Summary = () => {
         }
       }
     };
-  
+
     console.log("Generated Report JSON:", JSON.stringify(reportData, null, 2));
-  
-    // Later you can send reportData to your backend via fetch, axios, etc.
+
+
+    try {
+      const response = await fetch("http://127.0.0.1:8001/api/test/report/", { // Using port 8001
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reportData)
+      });
+
+      if (!response.ok) {
+          // Try to get error details from response if possible
+          let errorDetails = `HTTP error! Status: ${response.status}`;
+          try {
+              const errorData = await response.json(); // Assume error response is JSON
+              errorDetails = errorData.detail || JSON.stringify(errorData);
+          } catch (jsonError) {
+              // If response is not JSON or empty, use the status text
+              errorDetails = response.statusText || errorDetails;
+          }
+        throw new Error(`Error generating report: ${errorDetails}`);
+      }
+
+      const reportResponse = await response.text();
+
+      sessionStorage.setItem("reportData", reportResponse);
+      sessionStorage.setItem("patientDetails", JSON.stringify(patientDetails));
+      sessionStorage.setItem("sessionDetails", JSON.stringify(sessionDetails));
+
+      router.push("/report");
+
+    } catch (error) {
+      console.error("Error generating report:", error);
+      setError(error.message || "An unexpected error occurred."); // Set error state for display
+    } finally {
+      setLoading(false); // Ensure loading is turned off
+    }
   };
-  
 
   return (
     <div className="summary-container">
+
+      {/* Loading Overlay - Rendered conditionally */}
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-spinner"></div>
+          <p>Generating Report...</p>
+          <p>Please wait.</p>
+        </div>
+      )}
+
       <h1>Summary</h1>
+
+      {/* Display Error Message */}
+      {error && (
+        <div className="error-message">
+          <p><strong>Error:</strong> {error}</p>
+          <p>Please check the details or try again later.</p>
+        </div>
+      )}
+
       <section className="patient-summary">
         <h2>Patient Details</h2>
         {patientDetails ? (
           <ul>
-            <li>
+             <li>
               <strong>Patient Name:</strong> {patientDetails.patientName}
             </li>
             <li>
@@ -105,11 +164,12 @@ const Summary = () => {
           <p>No patient details available.</p>
         )}
       </section>
+
       <section className="session-summary">
         <h2>Session Details</h2>
         {sessionDetails ? (
           <div>
-            <h3>First Occurrence</h3>
+             <h3>First Occurrence</h3>
             <ul>
               <li>
                 <strong>Antecedent:</strong> {sessionDetails.antecedent1}
@@ -165,12 +225,26 @@ const Summary = () => {
           <p>No session details available.</p>
         )}
       </section>
+
+      {/* Buttons Section */}
       <div className="summary-buttons">
-        <button type="button" onClick={handleBack}>
-          Back to Session Details
+        {/* Back Button - Disable while loading */}
+        <button
+          type="button"
+          onClick={handleBack}
+          disabled={loading} // Disable Back button during loading too
+          style={{ marginRight: "10px", display: "inline-flex", alignItems: "center", gap: "5px" }}
+        >
+          <ArrowLeft size={16} /> Back to Session Details
         </button>
-        <button type="button" onClick={handleGenerateReport}>
-          Generate Report
+
+        {/* Generate Report Button - Disable and change text while loading */}
+        <button
+          type="button"
+          onClick={handleGenerateReport}
+          disabled={loading} // Disable button when loading
+        >
+          {loading ? "Generating..." : "Generate Report"}
         </button>
       </div>
     </div>
