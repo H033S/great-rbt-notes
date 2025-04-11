@@ -1,25 +1,38 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import "../components/styles/SessionDetails.css";
+
+class Result {
+  constructor() {
+    this.increase = false;
+    this.decrease = false;
+  }
+}
+
+class MaladaptiveBehavior {
+  constructor() {
+    this.behavior = "";
+    this.antecedent = "";
+    this.function = "";
+    this.intervention = "";
+    this.replacement_behavior = "";
+    this.prompts_used = "";
+    this.reinforcer = "";
+    this.consequence_based_reinforcement = "";
+    this.result = new Result();
+  }
+}
 
 const SessionDetails = () => {
   const navigate = useRouter();
   const [formData, setFormData] = useState({
-    antecedent1: "",
-    maladaptiveBehavior1: "",
-    intervention1: "",
-    interventionResult1: "",
-    antecedent2: "",
-    maladaptiveBehavior2: "",
-    intervention2: "",
-    interventionResult2: "",
-    reinforcersUsed: "",
-    whenReinforcerUsed: "",
-    dataCollected: "",
-    concerns: "",
-    nextSteps: ""
+    /** @type {MaladaptiveBehavior[]} */
+    maladaptiveBehaviors: [],
+    /** @type {string[]} */
+    reinforcement: [],
+    /** @type {string} */
+    session_end: "",
   });
 
   // Load any saved session details from sessionStorage on mount
@@ -51,153 +64,167 @@ const SessionDetails = () => {
 
   return (
     <form className="session-details-form" onSubmit={handleSubmit}>
-      <h2>First Occurrence</h2>
+      <h2>Maladaptive Behaviors</h2>
+      {formData.maladaptiveBehaviors.map((behavior, index) => (
+        <div key={index} className="behavior-section" style={{ 
+          padding: '15px',
+          border: '1px solid #ddd',
+          borderRadius: '8px',
+          marginBottom: '15px'
+        }}>
+          <h3 style={{ color: '#333', marginBottom: '10px' }}>Behavior {index + 1}</h3>
+          <div style={{ marginBottom: '10px' }}>
+            <label htmlFor={`behavior-${index}`} style={{ color: '#333', display: 'block', marginBottom: '5px' }}>Behavior:</label>
+            <input
+              type="text"
+              id={`behavior-${index}`}
+              value={behavior.behavior}
+              onChange={(e) => {
+                const newBehaviors = [...formData.maladaptiveBehaviors];
+                newBehaviors[index].behavior = e.target.value;
+                setFormData({ ...formData, maladaptiveBehaviors: newBehaviors });
+              }}
+              required
+              style={{ 
+                width: '100%',
+                padding: '8px',
+                border: '1px solid #ddd',
+                borderRadius: '4px'
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <label htmlFor={`antecedent-${index}`} style={{ color: '#333', display: 'block', marginBottom: '5px' }}>Antecedent:</label>
+            <input
+              type="text"
+              id={`antecedent-${index}`}
+              value={behavior.antecedent}
+              onChange={(e) => {
+                const newBehaviors = [...formData.maladaptiveBehaviors];
+                newBehaviors[index].antecedent = e.target.value;
+                setFormData({ ...formData, maladaptiveBehaviors: newBehaviors });
+              }}
+              required
+              style={{ 
+                width: '100%',
+                padding: '8px',
+                border: '1px solid #ddd',
+                borderRadius: '4px'
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <label htmlFor={`function-${index}`} style={{ color: '#333', display: 'block', marginBottom: '5px' }}>Function:</label>
+            <input
+              type="text"
+              id={`function-${index}`}
+              value={behavior.function}
+              onChange={(e) => {
+                const newBehaviors = [...formData.maladaptiveBehaviors];
+                newBehaviors[index].function = e.target.value;
+                setFormData({ ...formData, maladaptiveBehaviors: newBehaviors });
+              }}
+              required
+              style={{ 
+                width: '100%',
+                padding: '8px',
+                border: '1px solid #ddd',
+                borderRadius: '4px'
+              }}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const newBehaviors = formData.maladaptiveBehaviors.filter((_, i) => i !== index);
+              setFormData({ ...formData, maladaptiveBehaviors: newBehaviors });
+            }}
+            style={{
+              backgroundColor: '#ff4444',
+              color: 'white',
+              border: 'none',
+              padding: '8px 15px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Remove Behavior
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => {
+          setFormData({
+            ...formData,
+            maladaptiveBehaviors: [...formData.maladaptiveBehaviors, new MaladaptiveBehavior()]
+          });
+        }}
+        style={{
+          backgroundColor: '#4CAF50',
+          color: 'white',
+          border: 'none',
+          padding: '10px 20px',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          marginBottom: '20px'
+        }}
+      >
+        Add Behavior
+      </button>
+
+      <h2>Reinforcers Used</h2>
+      {formData.reinforcement.map((reinforcer, index) => (
+        <div key={index} className="reinforcer-section">
+          <input
+            type="text"
+            value={reinforcer}
+            onChange={(e) => {
+              const newReinforcement = [...formData.reinforcement];
+              newReinforcement[index] = e.target.value;
+              setFormData({ ...formData, reinforcement: newReinforcement });
+            }}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const newReinforcement = formData.reinforcement.filter((_, i) => i !== index);
+              setFormData({ ...formData, reinforcement: newReinforcement });
+            }}
+          >
+            Remove
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => {
+          setFormData({
+            ...formData,
+            reinforcement: [...formData.reinforcement, ""]
+          });
+        }}
+      >
+        Add Reinforcer
+      </button>
+
+      <h2>Session End</h2>
       <div>
-        <label htmlFor="antecedent1">Antecedent:</label>
+        <label htmlFor="session_end">Session End Notes:</label>
         <input
           type="text"
-          id="antecedent1"
-          name="antecedent1"
-          value={formData.antecedent1}
-          onChange={handleChange}
+          id="session_end"
+          value={formData.session_end}
+          onChange={(e) => setFormData({ ...formData, session_end: e.target.value })}
           required
         />
       </div>
-      <div>
-        <label htmlFor="maladaptiveBehavior1">Maladaptive Behavior:</label>
-        <input
-          type="text"
-          id="maladaptiveBehavior1"
-          name="maladaptiveBehavior1"
-          value={formData.maladaptiveBehavior1}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="intervention1">Intervention/Technique Used:</label>
-        <input
-          type="text"
-          id="intervention1"
-          name="intervention1"
-          value={formData.intervention1}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="interventionResult1">Result of Intervention:</label>
-        <input
-          type="text"
-          id="interventionResult1"
-          name="interventionResult1"
-          value={formData.interventionResult1}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <h2>Second Occurrence</h2>
-      <div>
-        <label htmlFor="antecedent2">Antecedent:</label>
-        <input
-          type="text"
-          id="antecedent2"
-          name="antecedent2"
-          value={formData.antecedent2}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="maladaptiveBehavior2">Maladaptive Behavior:</label>
-        <input
-          type="text"
-          id="maladaptiveBehavior2"
-          name="maladaptiveBehavior2"
-          value={formData.maladaptiveBehavior2}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="intervention2">Intervention/Technique Used:</label>
-        <input
-          type="text"
-          id="intervention2"
-          name="intervention2"
-          value={formData.intervention2}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="interventionResult2">Result of Intervention:</label>
-        <input
-          type="text"
-          id="interventionResult2"
-          name="interventionResult2"
-          value={formData.interventionResult2}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <h2>Reinforcement</h2>
-      <div>
-        <label htmlFor="reinforcersUsed">Reinforcers Used:</label>
-        <input
-          type="text"
-          id="reinforcersUsed"
-          name="reinforcersUsed"
-          value={formData.reinforcersUsed}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="whenReinforcerUsed">When Reinforcer Was Used:</label>
-        <input
-          type="text"
-          id="whenReinforcerUsed"
-          name="whenReinforcerUsed"
-          value={formData.whenReinforcerUsed}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <h2>Closure</h2>
-      <div>
-        <label htmlFor="dataCollected">Was Data Collected:</label>
-        <input
-          type="text"
-          id="dataCollected"
-          name="dataCollected"
-          value={formData.dataCollected}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="concerns">Medical/Safety Concerns:</label>
-        <input
-          type="text"
-          id="concerns"
-          name="concerns"
-          value={formData.concerns}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label htmlFor="nextSteps">Next Steps for ABA Therapy:</label>
-        <input
-          type="text"
-          id="nextSteps"
-          name="nextSteps"
-          value={formData.nextSteps}
-          onChange={handleChange}
-        />
-      </div>
+
       <button type="submit">Continue</button>
-       <button type="button" onClick={handleBack}>Back</button>
+      <button type="button" onClick={handleBack}>
+        Back
+      </button>
     </form>
   );
 };
