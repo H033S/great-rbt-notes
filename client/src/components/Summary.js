@@ -46,9 +46,11 @@ const Summary = () => {
 
     try {
       console.log("Attempting to send report data:", reportData);
+      console.log("Environment", process.env.NODE_ENV);
       
-      //const response = await fetch("http://127.0.0.1:8000/api/test/report", {
-      const response = await fetch("http://127.0.0.1:8000/api/v1/report", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      console.log("API URL:", apiUrl);
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
