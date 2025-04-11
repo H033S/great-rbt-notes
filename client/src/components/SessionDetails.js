@@ -68,9 +68,6 @@ const SessionDetails = () => {
             marginBottom: "15px",
           }}
         >
-          <h3 style={{ color: "#333", marginBottom: "10px" }}>
-            Behavior {index + 1}
-          </h3>
           <div style={{ marginBottom: "10px" }}>
             <label
               htmlFor={`behavior-${index}`}
@@ -298,7 +295,7 @@ const SessionDetails = () => {
           </div>
           <div style={{ marginBottom: "10px" }}>
             <span
-              style={{ color: "#333", fontWeight: "bold", marginRight: "10px" }}
+              style={{ color: "#333", fontWeight: "bold", marginRight: "10px", marginBottom: "5px" }}
             >
               Result:
             </span>
@@ -408,9 +405,6 @@ const SessionDetails = () => {
             marginBottom: "15px",
           }}
         >
-          <h3 style={{ color: "#333", marginBottom: "10px" }}>
-            Reinforcer {index + 1}
-          </h3>
           <div style={{ marginBottom: "10px" }}>
             <label
               htmlFor={`reinforcer-${index}`}
