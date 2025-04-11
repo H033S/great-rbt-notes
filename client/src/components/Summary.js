@@ -44,33 +44,39 @@ const Summary = () => {
 
     console.log("Generated Report JSON:", JSON.stringify(reportData, null, 2));
 
-
     try {
-      const response = await fetch("http://127.0.0.1:8001/api/test/report/", { // Using port 8001
+      console.log("Attempting to send report data:", reportData);
+      
+      //const response = await fetch("http://127.0.0.1:8000/api/test/report", {
+      const response = await fetch("http://127.0.0.1:8000/api/v1/report", {
         method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
         body: JSON.stringify(reportData)
       });
 
+      console.log("Response status:", response.status);
+
       if (!response.ok) {
-          // Try to get error details from response if possible
-          let errorDetails = `HTTP error! Status: ${response.status}`;
-          try {
-              const errorData = await response.json(); // Assume error response is JSON
-              errorDetails = errorData.detail || JSON.stringify(errorData);
-          } catch (jsonError) {
-              // If response is not JSON or empty, use the status text
-              errorDetails = response.statusText || errorDetails;
-          }
+        let errorDetails = `HTTP error! Status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorDetails = errorData.detail || JSON.stringify(errorData);
+        } catch (jsonError) {
+          errorDetails = response.statusText || errorDetails;
+        }
         throw new Error(`Error generating report: ${errorDetails}`);
       }
 
       const reportResponse = await response.text();
+      console.log("Report response received:", reportResponse);
 
       sessionStorage.setItem("reportData", reportResponse);
-      sessionStorage.setItem("patientDetails", JSON.stringify(patientDetails));
-      sessionStorage.setItem("sessionDetails", JSON.stringify(sessionDetails));
+      sessionStorage.setItem("patient_details", JSON.stringify(patientDetails));
+      sessionStorage.setItem("session_details", JSON.stringify(sessionDetails));
 
       router.push("/report");
 
