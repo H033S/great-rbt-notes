@@ -13,8 +13,8 @@ const Summary = () => {
 
   // Load saved data when the component mounts
   useEffect(() => {
-    const savedPatient = sessionStorage.getItem("patientDetails");
-    const savedSession = sessionStorage.getItem("sessionDetails");
+    const savedPatient = sessionStorage.getItem("patient_details");
+    const savedSession = sessionStorage.getItem("session_details");
 
     if (savedPatient) {
       setPatientDetails(JSON.parse(savedPatient));
@@ -34,70 +34,51 @@ const Summary = () => {
     setLoading(true);
 
     const reportData = {
-      // Patient details from PatientDetails.js
-      client_name: patientDetails?.patientName || "",
-      caregiver_name: patientDetails?.caregiverName || "",
-      date_of_treatment: patientDetails?.dateOfTreatment || "",
-      address: patientDetails?.address || "",
-      city: patientDetails?.city || "",
-      state: patientDetails?.state || "",
-      zip: patientDetails?.zip || "",
-      apt: patientDetails?.apt || "",
-      // Session details from SessionDetails.js
-      session: {
-        first_occurrence: {
-          antecedent: sessionDetails?.antecedent1 || "",
-          maladaptive_behavior: sessionDetails?.maladaptiveBehavior1 || "",
-          intervention: sessionDetails?.intervention1 || "",
-          result: sessionDetails?.interventionResult1 || ""
-        },
-        second_occurrence: {
-          antecedent: sessionDetails?.antecedent2 || "",
-          maladaptive_behavior: sessionDetails?.maladaptiveBehavior2 || "",
-          intervention: sessionDetails?.intervention2 || "",
-          result: sessionDetails?.interventionResult2 || ""
-        },
-        reinforcement: {
-          reinforcers_used: sessionDetails?.reinforcersUsed || "",
-          when_reinforcer_used: sessionDetails?.whenReinforcerUsed || ""
-        },
-        closure: {
-          data_collected: sessionDetails?.dataCollected || "",
-          concerns: sessionDetails?.concerns || "",
-          next_steps: sessionDetails?.nextSteps || ""
-        }
-      }
+      client_name: patientDetails?.client_name || "",
+      caregiver_name: patientDetails?.caregiver_name || "",
+      place_of_service: patientDetails?.place_of_service || "",
+      maladaptive_behaviors: sessionDetails?.maladaptive_behaviors || [],
+      reinforcers_used: sessionDetails?.reinforcers_used || [],
+      session_end_state: sessionDetails?.session_end_state || "",
     };
 
     console.log("Generated Report JSON:", JSON.stringify(reportData, null, 2));
 
-
     try {
-      const response = await fetch("http://127.0.0.1:8001/api/test/report/", { // Using port 8001
+      console.log("Attempting to send report data:", reportData);
+      console.log("Environment", process.env.NODE_ENV);
+      
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      console.log("API URL:", apiUrl);
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL, {
         method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
         body: JSON.stringify(reportData)
       });
 
+      console.log("Response status:", response.status);
+
       if (!response.ok) {
-          // Try to get error details from response if possible
-          let errorDetails = `HTTP error! Status: ${response.status}`;
-          try {
-              const errorData = await response.json(); // Assume error response is JSON
-              errorDetails = errorData.detail || JSON.stringify(errorData);
-          } catch (jsonError) {
-              // If response is not JSON or empty, use the status text
-              errorDetails = response.statusText || errorDetails;
-          }
+        let errorDetails = `HTTP error! Status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorDetails = errorData.detail || JSON.stringify(errorData);
+        } catch (jsonError) {
+          errorDetails = response.statusText || errorDetails;
+        }
         throw new Error(`Error generating report: ${errorDetails}`);
       }
 
       const reportResponse = await response.text();
+      console.log("Report response received:", reportResponse);
 
       sessionStorage.setItem("reportData", reportResponse);
-      sessionStorage.setItem("patientDetails", JSON.stringify(patientDetails));
-      sessionStorage.setItem("sessionDetails", JSON.stringify(sessionDetails));
+      sessionStorage.setItem("patient_details", JSON.stringify(patientDetails));
+      sessionStorage.setItem("session_details", JSON.stringify(sessionDetails));
 
       router.push("/report");
 
@@ -135,29 +116,14 @@ const Summary = () => {
         <h2>Patient Details</h2>
         {patientDetails ? (
           <ul>
-             <li>
-              <strong>Patient Name:</strong> {patientDetails.patientName}
+            <li>
+              <strong>Client Name:</strong> {patientDetails.client_name}
             </li>
             <li>
-              <strong>Caregiver Name:</strong> {patientDetails.caregiverName}
+              <strong>Caregiver Name:</strong> {patientDetails.caregiver_name}
             </li>
             <li>
-              <strong>Date of Treatment:</strong> {patientDetails.dateOfTreatment}
-            </li>
-            <li>
-              <strong>Address:</strong> {patientDetails.address}
-            </li>
-            <li>
-              <strong>City:</strong> {patientDetails.city}
-            </li>
-            <li>
-              <strong>State:</strong> {patientDetails.state}
-            </li>
-            <li>
-              <strong>Zip:</strong> {patientDetails.zip}
-            </li>
-            <li>
-              <strong>Apt:</strong> {patientDetails.apt}
+              <strong>Place of Service:</strong> {patientDetails.place_of_service}
             </li>
           </ul>
         ) : (
@@ -169,57 +135,78 @@ const Summary = () => {
         <h2>Session Details</h2>
         {sessionDetails ? (
           <div>
-             <h3>First Occurrence</h3>
-            <ul>
-              <li>
-                <strong>Antecedent:</strong> {sessionDetails.antecedent1}
-              </li>
-              <li>
-                <strong>Maladaptive Behavior:</strong> {sessionDetails.maladaptiveBehavior1}
-              </li>
-              <li>
-                <strong>Intervention:</strong> {sessionDetails.intervention1}
-              </li>
-              <li>
-                <strong>Result:</strong> {sessionDetails.interventionResult1}
-              </li>
-            </ul>
-            <h3>Second Occurrence</h3>
-            <ul>
-              <li>
-                <strong>Antecedent:</strong> {sessionDetails.antecedent2}
-              </li>
-              <li>
-                <strong>Maladaptive Behavior:</strong> {sessionDetails.maladaptiveBehavior2}
-              </li>
-              <li>
-                <strong>Intervention:</strong> {sessionDetails.intervention2}
-              </li>
-              <li>
-                <strong>Result:</strong> {sessionDetails.interventionResult2}
-              </li>
-            </ul>
-            <h3>Reinforcement</h3>
-            <ul>
-              <li>
-                <strong>Reinforcers Used:</strong> {sessionDetails.reinforcersUsed}
-              </li>
-              <li>
-                <strong>When Used:</strong> {sessionDetails.whenReinforcerUsed}
-              </li>
-            </ul>
-            <h3>Closure</h3>
-            <ul>
-              <li>
-                <strong>Data Collected:</strong> {sessionDetails.dataCollected}
-              </li>
-              <li>
-                <strong>Medical/Safety Concerns:</strong> {sessionDetails.concerns}
-              </li>
-              <li>
-                <strong>Next Steps:</strong> {sessionDetails.nextSteps}
-              </li>
-            </ul>
+            <h3 style={{ marginBottom: '20px' }}>Maladaptive Behaviors</h3>
+            {sessionDetails.maladaptive_behaviors && sessionDetails.maladaptive_behaviors.map((behavior, index) => (
+              <div key={index} className="behavior-summary" style={{ 
+                marginBottom: '20px',
+                marginLeft: '20px'
+              }}>
+                <h4 style={{ 
+                  marginBottom: '15px',
+                  borderBottom: '1px solid #cce0ff',
+                  paddingBottom: '8px'
+                }}>Behavior {index + 1}</h4>
+                
+                <ul style={{ 
+                  listStyle: 'none', 
+                  padding: 0,
+                  marginLeft: '20px'
+                }}>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Behavior:</strong>{' '}
+                    {behavior.behavior}
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Antecedent:</strong>{' '}
+                    {behavior.antecedent}
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Function:</strong>{' '}
+                    {behavior.function}
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Intervention:</strong>{' '}
+                    {behavior.intervention}
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Replacement Behavior:</strong>{' '}
+                    {behavior.replacement_behavior}
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Prompts Used:</strong>{' '}
+                    {behavior.prompts_used}
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Reinforcer:</strong>{' '}
+                    {behavior.reinforcer}
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Consequence Based Reinforcement:</strong>{' '}
+                    {behavior.consequence_based_reinforcement}
+                  </li>
+                  <li style={{ marginBottom: '10px' }}>
+                    <strong>Result:</strong>{' '}
+                    {behavior.result.increase ? 'Increase' : ''} 
+                    {behavior.result.increase && behavior.result.decrease ? ', ' : ''}
+                    {behavior.result.decrease ? 'Decrease' : ''}
+                  </li>
+                </ul>
+              </div>
+            ))}
+
+            <h3>Reinforcers Used</h3>
+            {sessionDetails.reinforcement && sessionDetails.reinforcement.length > 0 ? (
+              <ul>
+                {sessionDetails.reinforcement.map((reinforcer, index) => (
+                  <li key={index}>{reinforcer}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No reinforcers recorded.</p>
+            )}
+
+            <h3>Session End</h3>
+            <p>{sessionDetails.session_end_state || 'No session end notes recorded.'}</p>
           </div>
         ) : (
           <p>No session details available.</p>

@@ -6,127 +6,51 @@ import "../components/styles/PatientDetails.css";
 const PatientDetails = () => {
   const navigate = useRouter();
   const [formData, setFormData] = useState({
-    patientName: "",
-    caregiverName: "",
-    dateOfTreatment: "",
-    address: "",
-    city: "",
-    state: "",
-    zip: "",
-    apt: ""
+    client_name: "",
+    caregiver_name: "",
+    place_of_service: "",
   });
-
-  // On component mount, load saved data from sessionStorage (if any)
-  useEffect(() => {
-    const savedData = sessionStorage.getItem("patientDetails");
-    if (savedData) {
-      setFormData(JSON.parse(savedData));
-    }
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const newData = { ...prev, [name]: value };
-      // Save the updated form data to sessionStorage
-      sessionStorage.setItem("patientDetails", JSON.stringify(newData));
-      return newData;
-    });
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form Submitted:", formData);
+    sessionStorage.setItem("patient_details", JSON.stringify(formData));
     navigate.push("/session-details");
   };
 
   return (
     <form className="patient-details-form" onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="patientName">Patient Name:</label>
+        <label htmlFor="client_name">Client Name:</label>
         <input
           type="text"
-          id="patientName"
-          name="patientName"
-          value={formData.patientName}
-          onChange={handleChange}
+          id="client_name"
+          name="client_name"
+          value={formData.client_name}
+          onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
           required
         />
       </div>
       <div>
-        <label htmlFor="caregiverName">Caregiver Name:</label>
+        <label htmlFor="caregiver_name">Caregiver Name:</label>
         <input
           type="text"
-          id="caregiverName"
-          name="caregiverName"
-          value={formData.caregiverName}
-          onChange={handleChange}
+          id="caregiver_name"
+          name="caregiver_name"
+          value={formData.caregiver_name}
+          onChange={(e) => setFormData({ ...formData, caregiver_name: e.target.value })}
           required
         />
       </div>
       <div>
-        <label htmlFor="dateOfTreatment">Date of Treatment:</label>
-        <input
-          type="date"
-          id="dateOfTreatment"
-          name="dateOfTreatment"
-          value={formData.dateOfTreatment}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="address">Address:</label>
+        <label htmlFor="place_of_service">Place of Service:</label>
         <input
           type="text"
-          id="address"
-          name="address"
-          value={formData.address}
-          onChange={handleChange}
+          id="place_of_service"
+          name="place_of_service"
+          value={formData.place_of_service}
+          onChange={(e) => setFormData({ ...formData, place_of_service: e.target.value })}
           required
-        />
-      </div>
-      <div>
-        <label htmlFor="city">City:</label>
-        <input
-          type="text"
-          id="city"
-          name="city"
-          value={formData.city}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="state">State:</label>
-        <input
-          type="text"
-          id="state"
-          name="state"
-          value={formData.state}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="zip">Zip:</label>
-        <input
-          type="text"
-          id="zip"
-          name="zip"
-          value={formData.zip}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="apt">Apt. (Optional):</label>
-        <input
-          type="text"
-          id="apt"
-          name="apt"
-          value={formData.apt}
-          onChange={handleChange}
         />
       </div>
       <button type="submit">Continue</button>
