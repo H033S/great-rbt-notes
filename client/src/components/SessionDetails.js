@@ -35,18 +35,11 @@ const SessionDetails = () => {
     session_end_state: "",
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const newData = { ...prev, [name]: value };
-      sessionStorage.setItem("sessionDetails", JSON.stringify(newData));
-      return newData;
-    });
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form Submitted:", formData);
+    // Save data only when form is submitted
+    sessionStorage.setItem("session_details", JSON.stringify(formData));
     navigate.push("/summary");
   };
 
