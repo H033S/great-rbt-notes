@@ -11,27 +11,10 @@ const PatientDetails = () => {
     place_of_service: "",
   });
 
-  // On component mount, load saved data from sessionStorage (if any)
-  useEffect(() => {
-    const savedData = sessionStorage.getItem("patientDetails");
-    if (savedData) {
-      setFormData(JSON.parse(savedData));
-    }
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const newData = { ...prev, [name]: value };
-      // Save the updated form data to sessionStorage
-      sessionStorage.setItem("patientDetails", JSON.stringify(newData));
-      return newData;
-    });
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form Submitted:", formData);
+    sessionStorage.setItem("patient_details", JSON.stringify(formData));
     navigate.push("/session-details");
   };
 
@@ -44,7 +27,7 @@ const PatientDetails = () => {
           id="client_name"
           name="client_name"
           value={formData.client_name}
-          onChange={handleChange}
+          onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
           required
         />
       </div>
@@ -55,7 +38,7 @@ const PatientDetails = () => {
           id="caregiver_name"
           name="caregiver_name"
           value={formData.caregiver_name}
-          onChange={handleChange}
+          onChange={(e) => setFormData({ ...formData, caregiver_name: e.target.value })}
           required
         />
       </div>
@@ -66,7 +49,7 @@ const PatientDetails = () => {
           id="place_of_service"
           name="place_of_service"
           value={formData.place_of_service}
-          onChange={handleChange}
+          onChange={(e) => setFormData({ ...formData, place_of_service: e.target.value })}
           required
         />
       </div>
